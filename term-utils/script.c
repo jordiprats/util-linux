@@ -660,6 +660,17 @@ static void callback_child_sigstop(
 	kill(child, SIGCONT);
 }
 
+void str_replace(char *str, char* old, char* new)
+{
+	char *substr = NULL;
+
+	do {
+		substr = strstr (str, old);
+		if (substr != NULL)
+			strncpy (substr, new, strlen(new));
+	} while (substr != NULL);
+}
+
 static int callback_log_stream_activity(void *data, int fd, char *buf, size_t bufsz)
 {
 	struct script_control *ctl = (struct script_control *) data;
@@ -670,10 +681,12 @@ static int callback_log_stream_activity(void *data, int fd, char *buf, size_t bu
 	/* from stdin (user) to command */
 	if (fd == STDIN_FILENO)
 		ssz = log_stream_activity(ctl, &ctl->in, buf, (size_t) bufsz);
-
 	/* from command (master) to stdout and log */
-	else if (fd == ul_pty_get_childfd(ctl->pty))
+	else if (fd == ul_pty_get_childfd(ctl->pty)) {
+		str_replace(buf, "example", 
+										 "elpmaxe");
 		ssz = log_stream_activity(ctl, &ctl->out, buf, (size_t) bufsz);
+	}
 
 	if (ssz < 0)
 		return (int) ssz;
